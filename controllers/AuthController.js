@@ -1,7 +1,22 @@
 
 
 exports.authRegister = (req, res) => {
-    //TODO: register function
+ const { firstName, lastName, email, password } = req.body;
+ console.log (
+     "Fields:", 
+     firstName,
+     lastName,
+     email,
+     password);
+ 
+ //TODO1: Validate the fields
+ //TODO2: Check already register
+ //TODO3: Crpyt password
+ //TODO4: Save the user to DB
+
+
+
+
     res.send("Register Completed");
 };
 
