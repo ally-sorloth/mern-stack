@@ -1,4 +1,3 @@
-//mongodb+srv://dbUser:p7NvxsQJ2xTbfLDy@cluster0.7fvgf.mongodb.net/<dbname>?retryWrites=true&w=majority
 const mongoose = require("mongoose");
 const { options } = require("../routes/router");
 
