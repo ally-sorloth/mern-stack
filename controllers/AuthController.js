@@ -16,9 +16,7 @@ exports.authRegister = async (req, res) => {
  const validationErr = validationResult(req);
 
  if (validationErr.errors.length > 0) {
-     return res
-     .status(400)
-     .json({ errors: validationErr.array()});
+     return res.status(400).json({ errors: validationErr.array()});
  }
 
  //TODO2: Check already register (email)
