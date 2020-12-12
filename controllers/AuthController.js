@@ -1,5 +1,6 @@
 const User = require("../models/UserModel");
 const bcrypt = require("bcryptjs");
+const { check, validationResult} = require("express-validator");
 
 exports.authRegister = async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
@@ -11,6 +12,15 @@ exports.authRegister = async (req, res) => {
 //      password);
  
  //TODO1: Validate the fields
+
+ const validationErr = validationResult(req);
+
+ if (validationErr.errors.length > 0) {
+     return res
+     .status(400)
+     .json({ errors: validationErr.array()});
+ }
+
  //TODO2: Check already register (email)
 
  const userData = await User.findOne({ email});
@@ -28,7 +38,6 @@ exports.authRegister = async (req, res) => {
  const salt = await bcrypt.genSalt(10);
 
  const newPassword = await bcrypt.hash(password, salt);
- console.log("password: ", newPassword);
 
     const user = new User({
         firstName,
