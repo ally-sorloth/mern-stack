@@ -1,7 +1,7 @@
 const User = require("../models/UserModel");
 const bcrypt = require("bcryptjs");
 const { check, validationResult} = require("express-validator");
-const jwt = require("jsonwebtoken");
+var jwt = require("jsonwebtoken");
 
 exports.authRegister = async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
@@ -16,8 +16,8 @@ exports.authRegister = async (req, res) => {
 
  const validationErr = validationResult(req);
 
- if (validationErr.errors.length > 0) {
-     return res.status(400).json({ errors: validationErr.array()});
+ if (validationErr?.errors?.length > 0) {
+     return res.status(400).json({ errors: validationErr.array() });
  }
 
  //TODO2: Check already register (email)
@@ -27,7 +27,7 @@ exports.authRegister = async (req, res) => {
  if (userData) {
     return res
     .status(400)
-    .json({errors: [{message: "User already exists!!"}]});
+    .json({errors: [{message: "User already exists!!"}] });
  }
 
 
@@ -35,7 +35,6 @@ exports.authRegister = async (req, res) => {
  //TODO4: Save the user to DB yaptk
 
  const salt = await bcrypt.genSalt(10);
-
  const newPassword = await bcrypt.hash(password, salt);
 
     const user = new User({
@@ -53,20 +52,21 @@ exports.authRegister = async (req, res) => {
 
 exports.authLogin = async (req, res) => {
     const { email, password } = req.body;
+ //TODO1: field validation 
+
     const validationErr = validationResult(req);
-    //TODO1: field validation 
- if (validationErr.errors.length > 0) {
-     return res.status(400).json({ errors: validationErr.array()});
+    if (validationErr?.errors?.length > 0) {
+     return res.status(400).json({ errors: validationErr.array() });
  }
 
  //TODO2: user exist check
 
- const userData = await User.findOne({ email});
+ const userData = await User.findOne({ email });
 
- if (userData) {
+ if (!userData) {
     return res
     .status(400)
-    .json({errors: [{message: "User already exists!!"}]});
+    .json({ errors: [{message: "User doesn't exists!!"}] });
  }
 
     //TODO3: password compare
@@ -75,13 +75,21 @@ const isPasswordMatch = await bcrypt.compare(password, userData.password);
 if (!isPasswordMatch) {
     return res
     .status(400)
-    .json({errors: [{message: "Invalid credentials"}]});
+    .json({ errors: [{message: "Invalid credentials"}] });
 }
     //TODO4: autentication return token JSON WEB TOKEN - JWT
-jwt.sign(userData, process.env.JWT_SECRET_KEY, {expiresIN: 3600}, (error, token) => {
-    console.log("token", token)
-})
-
-
+jwt.sign(
+    {userData}, 
+    process.env.JWT_SECRET_KEY, 
+    { expiresIN: 3600 }, 
+    (err, token) => {
+        if (err) {
+            return res
+            .status(400)
+            .json({errors: [{message: "Unknown Error"}] });
+        }
+        res.send(token);
+        }
+    );
     res.send("Login Completed");
 };

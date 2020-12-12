@@ -1,4 +1,5 @@
 const express = require("express");
+const auth = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -12,8 +13,8 @@ const router = express.Router();
  */
 
 
- router.post("/", (req, res) =>{
-     res.send("PRIVATE PROFILE PAGE")
+ router.post("/", auth, (req, res) => {
+     res.send(req.decodedUser.email);
  });
 
 
