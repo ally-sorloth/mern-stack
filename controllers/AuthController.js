@@ -1,95 +1,77 @@
 const User = require("../models/UserModel");
 const bcrypt = require("bcryptjs");
-const { check, validationResult} = require("express-validator");
+const { validationResult } = require("express-validator");
 var jwt = require("jsonwebtoken");
 
 exports.authRegister = async (req, res) => {
-    const { firstName, lastName, email, password } = req.body;
-//  console.log (
-//      "Fields:", 
-//      firstName,
-//      lastName,
-//      email,
-//      password);
- 
- //TODO1: Validate the fields
+  const { firstName, lastName, email, password } = req.body;
 
- const validationErr = validationResult(req);
+  // Field Validation
+  const validationErr = validationResult(req);
+  if (validationErr?.errors?.length > 0) {
+    return res.status(400).json({ errors: validationErr.array() });
+  }
 
- if (validationErr?.errors?.length > 0) {
-     return res.status(400).json({ errors: validationErr.array() });
- }
-
- //TODO2: Check already register (email)
-
- const userData = await User.findOne({ email});
-
- if (userData) {
+  // User exist check
+  const userData = await User.findOne({ email });
+  if (userData) {
     return res
-    .status(400)
-    .json({errors: [{message: "User already exists!!"}] });
- }
+      .status(400)
+      .json({ errors: [{ message: "User already exists!!" }] });
+  }
 
+  // Password hash
+  const salt = await bcrypt.genSalt(10);
+  const newPassword = await bcrypt.hash(password, salt);
 
- //TODO3: Crpyt password yaptık
- //TODO4: Save the user to DB yaptk
+  // Save User
+  const user = new User({
+    firstName,
+    lastName,
+    email,
+    password: newPassword,
+  });
+  await user.save();
 
- const salt = await bcrypt.genSalt(10);
- const newPassword = await bcrypt.hash(password, salt);
-
-    const user = new User({
-        firstName,
-        lastName,
-        email,
-        password: newPassword, //crypted password
-    });
-    await user.save();
-
-    //TODO: Error handling for saving
-    res.send("Register Completed");
+  //TODO: Error handling for saving
+  res.send("Register Completed.");
 };
 
-
 exports.authLogin = async (req, res) => {
-    const { email, password } = req.body;
- //TODO1: field validation 
+  const { email, password } = req.body;
 
-    const validationErr = validationResult(req);
-    if (validationErr?.errors?.length > 0) {
-     return res.status(400).json({ errors: validationErr.array() });
- }
+  // Field Validation
+  const validationErr = validationResult(req);
+  if (validationErr?.errors?.length > 0) {
+    return res.status(400).json({ errors: validationErr.array() });
+  }
 
- //TODO2: user exist check
-
- const userData = await User.findOne({ email });
-
- if (!userData) {
+  // User exist check
+  const userData = await User.findOne({ email });
+  if (!userData) {
     return res
-    .status(400)
-    .json({ errors: [{message: "User doesn't exists!!"}] });
- }
+      .status(400)
+      .json({ errors: [{ message: "User doesn't exists!!" }] });
+  }
 
-    //TODO3: password compare
-
-const isPasswordMatch = await bcrypt.compare(password, userData.password);
-if (!isPasswordMatch) {
+  // Password compare
+  const isPasswordMatch = await bcrypt.compare(password, userData.password);
+  if (!isPasswordMatch) {
     return res
-    .status(400)
-    .json({ errors: [{message: "Invalid credentials"}] });
-}
-    //TODO4: autentication return token JSON WEB TOKEN - JWT
-jwt.sign(
-    {userData}, 
-    process.env.JWT_SECRET_KEY, 
-    { expiresIN: 3600 }, 
+      .status(400)
+      .json({ errors: [{ message: "Invalid credentials" }] });
+  }
+
+  // JSON WEB TOKEN - JWT
+  jwt.sign(
+    { userData },
+    process.env.JWT_SECRET_KEY,
+    { expiresIn: 3600 },
     (err, token) => {
-        if (err) {
-            return res
-            .status(400)
-            .json({errors: [{message: "Unknown Error"}] });
-        }
-        res.send(token);
-        }
-    );
-    res.send("Login Completed");
+      if (err) {
+        return res.status(400).json({ errors: [{ message: "Unknown Error" }] });
+      }
+      res.status(202).json({ token });
+    }
+  );
 };
