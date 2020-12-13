@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Layout, Menu } from "antd";
 import { useHistory } from "react-router-dom";
 import { Badge } from "antd";
 import { ShoppingCartOutlined } from "@ant-design/icons";
+import { AuthContext } from "../../context/AuthContext";
 
 const { Header } = Layout;
 
 const Navbar = () => {
+  const { isLoggedIn, setLoggedIn } = useContext(AuthContext);
   const [current, setCurrent] = useState("home");
   const history = useHistory();
 
@@ -15,7 +17,8 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    history.push(`/`);
+    localStorage.removeItem("token");
+    setLoggedIn(false);
   };
   const handleClick = (e) => {
     setCurrent({ current: e.key });
@@ -41,13 +44,20 @@ const Navbar = () => {
         <Menu.Item key="books">Books</Menu.Item>
 
         <a href="/cart" className="cart-navbar-link">
-          <Badge count={5}>
+          <Badge count={1}>
             <ShoppingCartOutlined className="cart-icon" />
           </Badge>
         </a>
-        <Menu.Item key="signin">Sign In</Menu.Item>
-        <Menu.Item key="signup">Sign Up</Menu.Item>
-        <Menu.Item key="logout">Logout</Menu.Item>
+        {isLoggedIn ? (
+          <Menu.Item key="logout" onClick={handleLogout}>
+            Logout
+          </Menu.Item>
+        ) : (
+          <>
+            <Menu.Item key="signin">Sign In</Menu.Item>
+            <Menu.Item key="signup">Sign Up</Menu.Item>
+          </>
+        )}
       </Menu>
     </Header>
   );

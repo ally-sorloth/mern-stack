@@ -7,7 +7,7 @@ import Signin from "../pages/Signin";
 import ForgotPassword from "../pages/ForgotPassword";
 import BookDetail from "../pages/BookDetail";
 import BookList from "../pages/BookList";
-import Navbar from "../components/header/Navbar";
+import Navbar from "../components/Header/Navbar";
 import Footer from "../components/Footer/Footer";
 import { Layout } from "antd";
 import Dashboard from "../pages/Dashboard";
@@ -30,7 +30,7 @@ function AppRouter() {
           <Route exact path="/books:id" component={BookDetail} />
           <Route
             exact
-            path="/books:id"
+            path="/profile"
             component={currentUser ? Dashboard : Signin}
           />
           <Route
