@@ -1,5 +1,4 @@
 import axios from "axios";
-import axios from "axios";
 
 export const fetchData = async (path) => {
   const token = "token";
