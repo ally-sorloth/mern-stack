@@ -2,23 +2,26 @@ const User = require("../models/UserModel");
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
 var jwt = require("jsonwebtoken");
+const checkFunction = require('../helpers/checkFunction');
 
 exports.authRegister = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
 
   // Field Validation
   const validationErr = validationResult(req);
-  if (validationErr?.errors?.length > 0) {
-    return res.status(400).json({ errors: validationErr.array() });
-  }
+  checkFunction(res, validationErr?.errors?.length > 0, validationErr.array());
+  // if (validationErr?.errors?.length > 0) {
+  //   return res.status(400).json({ errors: validationErr.array() });
+  // }
 
   // User exist check
   const userData = await User.findOne({ email });
-  if (userData) {
-    return res
-      .status(400)
-      .json({ errors: [{ message: "User already exists!!" }] });
-  }
+  checkFunction(res, userData, "User already exists!!");
+  // if (userData) {
+  //   return res
+  //     .status(400)
+  //     .json({ errors: [{ message: "User already exists!!" }] });
+  // }
 
   // Password hash
   const salt = await bcrypt.genSalt(10);
@@ -42,25 +45,28 @@ exports.authLogin = async (req, res) => {
 
   // Field Validation
   const validationErr = validationResult(req);
-  if (validationErr?.errors?.length > 0) {
-    return res.status(400).json({ errors: validationErr.array() });
-  }
+  checkFunction(res, validationErr?.errors?.length > 0, validationErr.array());
+  // if (validationErr?.errors?.length > 0) {
+  //   return res.status(400).json({ errors: validationErr.array() });
+  // }
 
   // User exist check
   const userData = await User.findOne({ email });
-  if (!userData) {
-    return res
-      .status(400)
-      .json({ errors: [{ message: "User doesn't exists!!" }] });
-  }
+  checkFunction(res, validationErr?.errors?.length > 0, validationErr.array());
+  // if (!userData) {
+  //   return res
+  //     .status(400)
+  //     .json({ errors: [{ message: "User doesn't exists!!" }] });
+  // }
 
   // Password compare
   const isPasswordMatch = await bcrypt.compare(password, userData.password);
-  if (!isPasswordMatch) {
-    return res
-      .status(400)
-      .json({ errors: [{ message: "Invalid credentials" }] });
-  }
+  checkFunction(res, !isPasswordMatch, "Invalid credentials");
+  // if (!isPasswordMatch) {
+  //   return res
+  //     .status(400)
+  //     .json({ errors: [{ message: "Invalid credentials" }] });
+  // }
 
   // JSON WEB TOKEN - JWT
   jwt.sign(
